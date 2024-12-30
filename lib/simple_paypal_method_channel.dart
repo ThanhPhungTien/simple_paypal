@@ -10,8 +10,10 @@ class MethodChannelSimplePaypal extends SimplePaypalPlatform {
   final methodChannel = const MethodChannel('simple_paypal');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> openPaypal({
+    required String orderId,
+    required String clientId,
+  }) async {
+    await methodChannel.invokeMethod<String>('openPaypal', [clientId, orderId]);
   }
 }

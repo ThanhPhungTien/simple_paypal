@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:simple_paypal/simple_paypal.dart';
 
 void main() {
@@ -16,35 +13,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _simplePaypalPlugin = SimplePaypal();
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _simplePaypalPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -55,9 +28,26 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => _clickPaypal(),
+                child: const Text('Paypal'),
+              )
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  _clickPaypal() async {
+    final result = await _simplePaypalPlugin.openPaypal(
+      clientId:
+          'AaJe8QETzPffm2W9z2JPyRWq5pTpTht7A0g7ExOCarL7oud-61j8eg6YeNnFqmJxr1qW6gHy5xHutX47',
+      orderId: '123123',
     );
   }
 }

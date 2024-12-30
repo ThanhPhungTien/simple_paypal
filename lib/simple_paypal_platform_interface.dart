@@ -23,7 +23,10 @@ abstract class SimplePaypalPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
+  Future<void> openPaypal({
+    required String orderId,
+    required String clientId,
+  }) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

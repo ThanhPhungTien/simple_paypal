@@ -1,3 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="vn.thanhpt.simple_paypal">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application>
+
+        <activity android:name=".MyPaymentsActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="simple_paypal" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+
+
+    </application>
+
 </manifest>

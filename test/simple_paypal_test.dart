@@ -7,9 +7,17 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockSimplePaypalPlatform
     with MockPlatformInterfaceMixin
     implements SimplePaypalPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<void> openPaypal({
+    required String orderId,
+    required String clientId,
+  }) {
+    // TODO: implement openPaypal
+    throw UnimplementedError();
+  }
 }
 
 void main() {
@@ -23,7 +31,5 @@ void main() {
     SimplePaypal simplePaypalPlugin = SimplePaypal();
     MockSimplePaypalPlatform fakePlatform = MockSimplePaypalPlatform();
     SimplePaypalPlatform.instance = fakePlatform;
-
-    expect(await simplePaypalPlugin.getPlatformVersion(), '42');
   });
 }
