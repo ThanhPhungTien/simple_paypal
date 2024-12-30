@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:simple_paypal/simple_paypal.dart';
-import 'package:simple_paypal/simple_paypal_platform_interface.dart';
-import 'package:simple_paypal/simple_paypal_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:simple_paypal/environment_paypal.dart';
+import 'package:simple_paypal/simple_paypal_method_channel.dart';
+import 'package:simple_paypal/simple_paypal_platform_interface.dart';
 
 class MockSimplePaypalPlatform
     with MockPlatformInterfaceMixin
@@ -11,11 +11,17 @@ class MockSimplePaypalPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<void> openPaypal({
-    required String orderId,
-    required String clientId,
-  }) {
+  Future<void> openPaypal({required String orderId}) {
     // TODO: implement openPaypal
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> initPaypal({
+    required String clientId,
+    required EnvironmentPaypal environment,
+  }) {
+    // TODO: implement initPaypal
     throw UnimplementedError();
   }
 }
@@ -28,7 +34,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    SimplePaypal simplePaypalPlugin = SimplePaypal();
     MockSimplePaypalPlatform fakePlatform = MockSimplePaypalPlatform();
     SimplePaypalPlatform.instance = fakePlatform;
   });

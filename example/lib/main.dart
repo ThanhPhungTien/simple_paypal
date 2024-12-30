@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_paypal/environment_paypal.dart';
 import 'package:simple_paypal/simple_paypal.dart';
 
 void main() {
@@ -13,10 +14,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _simplePaypalPlugin = SimplePaypal();
-
   @override
   void initState() {
+    SimplePaypal.instance.initPaypal(
+      clientId:
+          'AaJe8QETzPffm2W9z2JPyRWq5pTpTht7A0g7ExOCarL7oud-61j8eg6YeNnFqmJxr1qW6gHy5xHutX47',
+      environment: EnvironmentPaypal.sandbox,
+    );
     super.initState();
   }
 
@@ -43,11 +47,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  _clickPaypal() async {
-    final result = await _simplePaypalPlugin.openPaypal(
-      clientId:
-          'AaJe8QETzPffm2W9z2JPyRWq5pTpTht7A0g7ExOCarL7oud-61j8eg6YeNnFqmJxr1qW6gHy5xHutX47',
-      orderId: '123123',
-    );
-  }
+  _clickPaypal() async {}
 }

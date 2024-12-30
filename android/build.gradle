@@ -50,8 +50,8 @@ android {
 
     dependencies {
         implementation 'androidx.appcompat:appcompat:1.6.1'
-        implementation 'com.paypal.android:card-payments:1.6.0'
-        implementation "com.paypal.android:paypal-web-payments:1.6.0"
+        implementation 'com.paypal.android:card-payments:1.7.1'
+        implementation "com.paypal.android:paypal-web-payments:1.7.1"
         implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.21'
         implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21'
     }

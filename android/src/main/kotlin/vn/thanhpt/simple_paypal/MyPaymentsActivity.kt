@@ -3,7 +3,8 @@ package vn.thanhpt.simple_paypal
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -13,36 +14,73 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 
-class MyPaymentsActivity : FragmentActivity(), PayPalWebCheckoutListener {
 
-    val TAG = "MyPaymentsActivity"
+class MyPaymentsActivity : AppCompatActivity() {
+
+    private val tag = "MyPaymentsActivity"
+
+    private lateinit var paypalClient: PayPalWebCheckoutClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Hide the app bar
+        supportActionBar?.hide()
+
+        setContentView(R.layout.activity_my_payments)
+
+        val buttonBack = findViewById<Button>(R.id.buttonBack)
+
+        buttonBack.setOnClickListener {
+            finish()
+        }
+
+
         val clientId = intent.getStringExtra("ClientId") ?: ""
         val orderId = intent.getStringExtra("OrderId") ?: ""
+        val environment = intent.getSerializableExtra("Environment") as Environment
 
         val config = CoreConfig(
             clientId = clientId,
-            environment = Environment.SANDBOX,
+            environment = environment,
         )
 
-        Log.d(TAG, "onCreate: $clientId $orderId")
+        Log.d(tag, "onCreate: $clientId $orderId $environment")
 
-        val payPalWebCheckoutClient = PayPalWebCheckoutClient(
+        paypalClient = PayPalWebCheckoutClient(
             activity = this,
             configuration = config,
-            urlScheme = "simple_paypal://paypalpay",
+            urlScheme = "vn.thanhpt.simple.paypal",
         )
+
+        paypalClient.listener = object : PayPalWebCheckoutListener {
+
+            override fun onPayPalWebCanceled() {
+                Log.d(tag, "onPayPalWebCanceled: ")
+
+            }
+
+            override fun onPayPalWebFailure(error: PayPalSDKError) {
+                Log.d(tag, "onPayPalWebFailure: $error")
+            }
+
+            override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
+                Log.d(tag, "onPayPalWebSuccess: $result")
+                val intent = Intent()
+                intent.putExtra("orderId", result.orderId)
+                intent.putExtra("payerId", result.payerId)
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+
+
+        }
 
         val request = PayPalWebCheckoutRequest(
             orderId = orderId,
             fundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
         )
 
-        payPalWebCheckoutClient.listener = this
-
-        payPalWebCheckoutClient.start(request)
+        paypalClient.start(request)
 
     }
 
@@ -50,20 +88,6 @@ class MyPaymentsActivity : FragmentActivity(), PayPalWebCheckoutListener {
     override fun onNewIntent(newIntent: Intent?) {
         super.onNewIntent(intent)
         intent = newIntent
-    }
-
-    override fun onPayPalWebCanceled() {
-        Log.d(TAG, "onPayPalWebCanceled: ")
-        setResult(RESULT_OK)
-        finish()
-    }
-
-    override fun onPayPalWebFailure(error: PayPalSDKError) {
-        Log.d(TAG, "onPayPalWebFailure: $error")
-    }
-
-    override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        Log.d(TAG, "onPayPalWebSuccess: $result")
     }
 
 }

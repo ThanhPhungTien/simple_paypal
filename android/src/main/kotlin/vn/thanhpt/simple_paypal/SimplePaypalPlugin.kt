@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.paypal.android.corepayments.Environment
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -23,17 +24,35 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private var activity: Activity? = null
 
-    private val TAG = "SimplePaypalPlugin"
+    private val tag = "SimplePaypalPlugin"
+
+    private var initDataPaypal: InitDataPaypal = InitDataPaypal(
+        clientId = "",
+        environment = Environment.SANDBOX,
+    )
+
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "simple_paypal")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
-
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+
+            Method.INIT_PAYPAL.value -> {
+                Log.d("SimplePaypalPlugin", "onMethodCall: initPaypal")
+                if (call.arguments == null) {
+                    result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
+                    return
+                }
+                val initData = call.arguments as List<*>
+                initDataPaypal = InitDataPaypal(
+                    clientId = initData[0] as String,
+                    environment = EnvironmentPaypal.toPaypalEnvironment(initData[1] as String)
+                )
+            }
 
             Method.OPEN_PAYPAL.value -> {
                 Log.d("SimplePaypalPlugin", "onMethodCall: openPaypal")
@@ -43,12 +62,13 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     return
                 }
 
-                val initData = call.arguments as List<*>
+                val orderId = call.arguments as String
 
                 val intent = Intent(context, MyPaymentsActivity::class.java)
-                intent.putExtra("ClientId", initData[0] as String)
-                intent.putExtra("OrderId", initData[1] as String)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra("ClientId", initDataPaypal.clientId)
+                intent.putExtra("Environment", initDataPaypal.environment)
+                intent.putExtra("OrderId", orderId)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 activity?.startActivityForResult(intent, 1001)
 
             }
@@ -83,9 +103,14 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        Log.d(tag, "onActivityResult: $resultCode $data $requestCode")
         when (requestCode) {
             1001 -> {
-                Log.d(TAG, "onActivityResult: hihi $resultCode")
+                if (resultCode == Activity.RESULT_OK){
+                    Log.d(tag, "onActivityResult: RESULT_OK")
+                } else if (resultCode == Activity.RESULT_CANCELED){
+                    Log.d(tag, "onActivityResult: RESULT_CANCELED")
+                }
             }
         }
         return false

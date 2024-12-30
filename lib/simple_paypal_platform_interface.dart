@@ -1,5 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'environment_paypal.dart';
 import 'simple_paypal_method_channel.dart';
 
 abstract class SimplePaypalPlatform extends PlatformInterface {
@@ -23,10 +24,14 @@ abstract class SimplePaypalPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> openPaypal({
-    required String orderId,
+  Future<void> initPaypal({
     required String clientId,
+    required EnvironmentPaypal environment,
   }) {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<void> openPaypal({required String orderId}) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }
