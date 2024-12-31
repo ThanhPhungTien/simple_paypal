@@ -109,15 +109,16 @@ class MyPaymentsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.d(tag, "onResume: $hasOpenedPaypal")
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (hasOpenedPaypal) {
-                hasOpenedPaypal = false
-                setResult(PaypalResultCode.CANCELED)
-                finish()
-                Log.d(tag, "finished ")
-            }
-        }, 5000)
-
+        if (hasOpenedPaypal) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (hasOpenedPaypal) {
+                    hasOpenedPaypal = false
+                    setResult(PaypalResultCode.CANCELED)
+                    finish()
+                    Log.d(tag, "finished ")
+                }
+            }, 200)
+        }
     }
 
 

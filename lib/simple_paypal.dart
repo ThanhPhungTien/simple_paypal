@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/services.dart';
 import 'package:simple_paypal/environment_paypal.dart';
 
@@ -26,11 +24,16 @@ class SimplePaypal {
     required String orderId,
     required Function(String payerId) onSuccess,
     required Function(String errorMessage) onFailure,
+    required Function() onCanceled,
   }) async {
     try {
       final result =
           await SimplePaypalPlatform.instance.openPaypal(orderId: orderId);
-      onSuccess(result);
+      if (result.isNotEmpty) {
+        onSuccess(result);
+      } else {
+        onCanceled();
+      }
     } on PlatformException catch (e) {
       onFailure(e.message ?? '');
     }
