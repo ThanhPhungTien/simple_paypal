@@ -19,6 +19,6 @@ class MethodChannelSimplePaypal extends SimplePaypalPlatform {
           .invokeMethod('initPaypal', [clientId, environment.value]);
 
   @override
-  Future<void> openPaypal({required String orderId}) async =>
-      await methodChannel.invokeMethod<String>('openPaypal', orderId);
+  Future<String> openPaypal({required String orderId}) async =>
+      (await methodChannel.invokeMethod<String>('openPaypal', orderId)) ?? '';
 }

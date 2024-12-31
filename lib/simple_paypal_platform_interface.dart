@@ -31,7 +31,7 @@ abstract class SimplePaypalPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> openPaypal({required String orderId}) {
+  Future<String> openPaypal({required String orderId}) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

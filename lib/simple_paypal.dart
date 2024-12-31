@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/services.dart';
 import 'package:simple_paypal/environment_paypal.dart';
 
 import 'simple_paypal_platform_interface.dart';
@@ -18,10 +21,18 @@ class SimplePaypal {
         environment: environment,
       );
 
+  /// Mở Paypal Web
   Future<void> openPaypal({
     required String orderId,
-  }) async =>
-      SimplePaypalPlatform.instance.openPaypal(
-        orderId: orderId,
-      );
+    required Function(String payerId) onSuccess,
+    required Function(String errorMessage) onFailure,
+  }) async {
+    try {
+      final result =
+          await SimplePaypalPlatform.instance.openPaypal(orderId: orderId);
+      onSuccess(result);
+    } on PlatformException catch (e) {
+      onFailure(e.message ?? '');
+    }
+  }
 }

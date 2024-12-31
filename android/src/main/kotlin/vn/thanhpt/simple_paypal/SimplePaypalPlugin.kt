@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
+
 /** SimplePaypalPlugin */
 class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     PluginRegistry.ActivityResultListener {
@@ -26,10 +27,14 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private val tag = "SimplePaypalPlugin"
 
+
     private var initDataPaypal: InitDataPaypal = InitDataPaypal(
         clientId = "",
         environment = Environment.SANDBOX,
     )
+
+
+    private var result: Result? = null
 
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -39,10 +44,10 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
+        this.result = result
         when (call.method) {
 
             Method.INIT_PAYPAL.value -> {
-                Log.d("SimplePaypalPlugin", "onMethodCall: initPaypal")
                 if (call.arguments == null) {
                     result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
                     return
@@ -55,7 +60,6 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
 
             Method.OPEN_PAYPAL.value -> {
-                Log.d("SimplePaypalPlugin", "onMethodCall: openPaypal")
 
                 if (call.arguments == null) {
                     result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
@@ -65,11 +69,10 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val orderId = call.arguments as String
 
                 val intent = Intent(context, MyPaymentsActivity::class.java)
-                intent.putExtra("ClientId", initDataPaypal.clientId)
-                intent.putExtra("Environment", initDataPaypal.environment)
-                intent.putExtra("OrderId", orderId)
-//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                activity?.startActivityForResult(intent, 1001)
+                intent.putExtra(Constant.CLIENT_ID, initDataPaypal.clientId)
+                intent.putExtra(Constant.ENVIRONMENT, initDataPaypal.environment)
+                intent.putExtra(Constant.ORDER_ID, orderId)
+                activity?.startActivityForResult(intent, Constant.PAYPAL_REQUEST_CODE)
 
             }
 
@@ -85,8 +88,8 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        activity = binding.activity
         binding.addActivityResultListener(this)
+        activity = binding.activity
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -95,7 +98,6 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activity = binding.activity
-        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivity() {
@@ -105,11 +107,35 @@ class SimplePaypalPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         Log.d(tag, "onActivityResult: $resultCode $data $requestCode")
         when (requestCode) {
-            1001 -> {
-                if (resultCode == Activity.RESULT_OK){
-                    Log.d(tag, "onActivityResult: RESULT_OK")
-                } else if (resultCode == Activity.RESULT_CANCELED){
-                    Log.d(tag, "onActivityResult: RESULT_CANCELED")
+            Constant.PAYPAL_REQUEST_CODE -> {
+                when (resultCode) {
+                    PaypalResultCode.SUCCESS -> {
+                        val dataResult = mapOf(
+                            Constant.ORDER_ID to data?.getStringExtra(Constant.ORDER_ID),
+                            Constant.PAYER_ID to data?.getStringExtra(Constant.PAYER_ID)
+                        )
+                        Log.d(tag, "onActivityResult: ${result != null} $dataResult")
+
+                        result?.success(data?.getStringExtra(Constant.PAYER_ID))
+                    }
+
+                    PaypalResultCode.FAILURE -> {
+                        if (data != null) {
+                            val code = data.getIntExtra(Constant.CODE, 0).toString()
+                            val errorDescription = data.getStringExtra(Constant.ERROR_DESCRIPTION)
+                            val correlationId = data.getStringExtra(Constant.CORRELATION_ID)
+                            Log.d(tag, "onActivityResult: $code $errorDescription $correlationId")
+                            result?.error(
+                                code,
+                                errorDescription,
+                                correlationId,
+                            )
+                        }
+                    }
+
+                    PaypalResultCode.CANCELED -> {
+                        result?.success(null)
+                    }
                 }
             }
         }

@@ -11,7 +11,7 @@ class MockSimplePaypalPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<void> openPaypal({required String orderId}) {
+  Future<String> openPaypal({required String orderId}) {
     // TODO: implement openPaypal
     throw UnimplementedError();
   }

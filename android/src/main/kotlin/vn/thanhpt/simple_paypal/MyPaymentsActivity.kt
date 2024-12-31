@@ -2,6 +2,8 @@ package vn.thanhpt.simple_paypal
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,9 @@ class MyPaymentsActivity : AppCompatActivity() {
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
 
+    var hasOpenedPaypal = false
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Hide the app bar
@@ -31,13 +36,14 @@ class MyPaymentsActivity : AppCompatActivity() {
         val buttonBack = findViewById<Button>(R.id.buttonBack)
 
         buttonBack.setOnClickListener {
+            setResult(PaypalResultCode.CANCELED)
             finish()
         }
 
 
-        val clientId = intent.getStringExtra("ClientId") ?: ""
-        val orderId = intent.getStringExtra("OrderId") ?: ""
-        val environment = intent.getSerializableExtra("Environment") as Environment
+        val clientId = intent.getStringExtra(Constant.CLIENT_ID) ?: ""
+        val orderId = intent.getStringExtra(Constant.ORDER_ID) ?: ""
+        val environment = intent.getSerializableExtra(Constant.ENVIRONMENT) as Environment
 
         val config = CoreConfig(
             clientId = clientId,
@@ -56,23 +62,28 @@ class MyPaymentsActivity : AppCompatActivity() {
 
             override fun onPayPalWebCanceled() {
                 Log.d(tag, "onPayPalWebCanceled: ")
-
             }
 
             override fun onPayPalWebFailure(error: PayPalSDKError) {
+                hasOpenedPaypal = false
                 Log.d(tag, "onPayPalWebFailure: $error")
-            }
-
-            override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-                Log.d(tag, "onPayPalWebSuccess: $result")
                 val intent = Intent()
-                intent.putExtra("orderId", result.orderId)
-                intent.putExtra("payerId", result.payerId)
-                setResult(RESULT_OK, intent)
+                intent.putExtra(Constant.CODE, error.code)
+                intent.putExtra(Constant.ERROR_DESCRIPTION, error.errorDescription)
+                intent.putExtra(Constant.CORRELATION_ID, error.correlationId)
+                setResult(PaypalResultCode.FAILURE, intent)
                 finish()
             }
 
-
+            override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
+                hasOpenedPaypal = false
+                Log.d(tag, "onPayPalWebSuccess: $result")
+                val intent = Intent()
+                intent.putExtra(Constant.ORDER_ID, result.orderId)
+                intent.putExtra(Constant.PAYER_ID, result.payerId)
+                setResult(PaypalResultCode.SUCCESS, intent)
+                finish()
+            }
         }
 
         val request = PayPalWebCheckoutRequest(
@@ -81,6 +92,31 @@ class MyPaymentsActivity : AppCompatActivity() {
         )
 
         paypalClient.start(request)
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        hasOpenedPaypal = true
+        Log.d(tag, "onStop: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(tag, "onPause: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(tag, "onResume: $hasOpenedPaypal")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (hasOpenedPaypal) {
+                hasOpenedPaypal = false
+                setResult(PaypalResultCode.CANCELED)
+                finish()
+                Log.d(tag, "finished ")
+            }
+        }, 5000)
 
     }
 
