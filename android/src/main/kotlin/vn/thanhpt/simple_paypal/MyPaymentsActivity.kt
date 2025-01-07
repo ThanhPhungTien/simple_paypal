@@ -43,7 +43,8 @@ class MyPaymentsActivity : AppCompatActivity() {
 
         val clientId = intent.getStringExtra(Constant.CLIENT_ID) ?: ""
         val orderId = intent.getStringExtra(Constant.ORDER_ID) ?: ""
-        val environment = intent.getSerializableExtra(Constant.ENVIRONMENT) as Environment
+        val environment =
+            intent.getSerializableExtra(Constant.ENVIRONMENT) as? Environment ?: Environment.SANDBOX
 
         val config = CoreConfig(
             clientId = clientId,
@@ -110,7 +111,9 @@ class MyPaymentsActivity : AppCompatActivity() {
         super.onResume()
         Log.d(tag, "onResume: $hasOpenedPaypal")
         if (hasOpenedPaypal) {
-            Handler(Looper.getMainLooper()).postDelayed({
+
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({
                 if (hasOpenedPaypal) {
                     hasOpenedPaypal = false
                     setResult(PaypalResultCode.CANCELED)
@@ -119,8 +122,8 @@ class MyPaymentsActivity : AppCompatActivity() {
                 }
             }, 200)
         }
-    }
 
+    }
 
     override fun onNewIntent(newIntent: Intent?) {
         super.onNewIntent(intent)
