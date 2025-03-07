@@ -1,11 +1,10 @@
 name: simple_paypal
 description: Simple Paypal plugin
 version: 0.0.1
-homepage:
+homepage: https://github.com/ThanhPhungTien
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: '>=3.24.3'
+  sdk: ">=2.18.4 <4.0.0"
 
 dependencies:
   flutter:
