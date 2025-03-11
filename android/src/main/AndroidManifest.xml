@@ -5,6 +5,13 @@
 
         <activity android:name=".MyPaymentsActivity"
             android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="vn.thanhpt.simple_paypal" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
         </activity>
 
     </application>
