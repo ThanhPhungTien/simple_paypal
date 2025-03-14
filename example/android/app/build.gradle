@@ -60,6 +60,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'vn.thanhpt.simple_paypal_example'
 }
 
 flutter {
