@@ -28,6 +28,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'vn.thanhpt.simple_paypal'
+
     compileSdkVersion 34
 
     compileOptions {
